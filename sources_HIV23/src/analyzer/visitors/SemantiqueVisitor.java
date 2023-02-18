@@ -253,23 +253,11 @@ public class SemantiqueVisitor implements ParserVisitor {
     }
 
     public Object checkIsBooleanType(SimpleNode node, Object data) {
-        DataStruct leftData = new DataStruct();
-        node.jjtGetChild(0).jjtAccept(this, leftData);
-        DataStruct rightData = new DataStruct();
-        node.jjtGetChild(1).jjtAccept(this, rightData);
-
-        String leftOperator = ((ASTCompExpr) node.jjtGetChild(0)).getValue();
-        String rightOperator = ((ASTCompExpr) node.jjtGetChild(1)).getValue();
-
-        if (NUMBER_OPERATORS_LIST.contains((leftOperator))) {
-            return null;
-        }
-        if (NUMBER_OPERATORS_LIST.contains(rightOperator)) {
-            return null;
-        }
-
-        if (leftData.type == VarType.Number || rightData.type == VarType.Number) {
-            throw new SemantiqueError("Invalid type in expression");
+        for (int i = 0; i < node.jjtGetNumChildren(); i++) {
+            node.jjtGetChild(i).jjtAccept(this, data);
+            if (((DataStruct)data).type == VarType.Number) {
+                throw new SemantiqueError("Invalid type in expression");
+            }
         }
 
         return null;
@@ -306,16 +294,17 @@ public class SemantiqueVisitor implements ParserVisitor {
             node.childrenAccept(this,data);
             return null;
         }
-
         this.OP++;
 
         if (NUMBER_OPERATORS_LIST.contains(operator)) {
             checkNumberType(node, data);
+            ((DataStruct) data).type = VarType.Bool;
             return null;
         }
 
         if (operator.equals("==") || operator.equals("!=")) {
             checkIsSameType(node,data);
+            ((DataStruct) data).type = VarType.Bool;
             return null;
         }
 
@@ -338,10 +327,10 @@ public class SemantiqueVisitor implements ParserVisitor {
         if (node.getOps().size() > 0) {
             this.OP++;
             checkNumberType(node, data);
+            ((DataStruct) data).type = VarType.Number;
             return null;
         }
 
-        node.childrenAccept(this, data);
         return null;
     }
 
@@ -356,10 +345,10 @@ public class SemantiqueVisitor implements ParserVisitor {
         if (node.getOps().size() > 0) {
             this.OP++;
             checkNumberType(node, data);
+            ((DataStruct) data).type = VarType.Number;
             return null;
         }
 
-        node.childrenAccept(this, data);
         return null;
     }
 
@@ -370,12 +359,16 @@ public class SemantiqueVisitor implements ParserVisitor {
             node.childrenAccept(this, data);
             return null;
         }
+
         if (node.getOps().size() > 0) {
             this.OP++;
             checkIsBooleanType(node, data);
+            return null;
         }
 
         node.childrenAccept(this, data);
+        ((DataStruct) data).type = VarType.Bool;
+
         return null;
     }
 
@@ -390,16 +383,16 @@ public class SemantiqueVisitor implements ParserVisitor {
     @Override
     public Object visit(ASTNotExpr node, Object data) {
         // TODO
-        int operators_length = node.getOps().size();
-        if (operators_length > 0) {
+        if (node.getOps().size() > 0) {
             this.OP++;
-            DataStruct right_value = new DataStruct();
-            node.jjtGetChild(0).jjtAccept(this, right_value);
-            if (right_value.type != VarType.Bool) {
+            node.jjtGetChild(0).jjtAccept(this, data);
+            if (((DataStruct) data).type != VarType.Bool) {
                 throw new SemantiqueError("Invalid type in expression");
             }
+            ((DataStruct) data).type = VarType.Bool;
             return null;
         }
+
         node.childrenAccept(this,data);
         return null;
     }
@@ -407,12 +400,10 @@ public class SemantiqueVisitor implements ParserVisitor {
     @Override
     public Object visit(ASTUnaExpr node, Object data) {
         // TODO
-        int operators_length = node.getOps().size();
-        if (operators_length > 0) {
+        if (node.getOps().size() > 0) {
             this.OP++;
-            DataStruct right_value = new DataStruct();
-            node.jjtGetChild(0).jjtAccept(this, right_value);
-            if (right_value.type != VarType.Number) {
+            node.jjtGetChild(0).jjtAccept(this, data);
+            if (((DataStruct) data).type != VarType.Number) {
                 throw new SemantiqueError("Invalid type in expression");
             }
             return null;
