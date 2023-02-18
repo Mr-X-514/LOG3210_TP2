@@ -89,6 +89,7 @@ public class SemantiqueVisitor implements ParserVisitor {
         // jjGetChild is used to access the 'Identifier()' child of 'Declaration'. getValue() is used to access its value
         // Here, declaration can only have (or has only) one child : Identifier() (see Langage.jjt for more info)
         String varName = ((ASTIdentifier) node.jjtGetChild(0)).getValue();
+
         // TODO
         this.VAR++;
 
@@ -187,6 +188,7 @@ public class SemantiqueVisitor implements ParserVisitor {
     public Object visit(ASTFunctionStmt node, Object data) {
         // TODO
 
+        /*
         DataStruct d = new DataStruct();
 
         int numChildren = node.jjtGetNumChildren();
@@ -204,7 +206,7 @@ public class SemantiqueVisitor implements ParserVisitor {
             Node child = node.jjtGetChild(i);
             child.jjtAccept(this, data);
         }
-
+        */
         return null;
     }
 
@@ -224,6 +226,7 @@ public class SemantiqueVisitor implements ParserVisitor {
     // On doit vérifier que le type de la variable est compatible avec celui de l'expression.
     @Override
     public Object visit(ASTAssignStmt node, Object data) {
+        /*
         // TODO
         String varName = ((ASTIdentifier) node.jjtGetChild(0)).getValue();
         DataStruct d = new DataStruct();
@@ -232,7 +235,7 @@ public class SemantiqueVisitor implements ParserVisitor {
         if (d.type != SymbolTable.get(varName)) {
             throw new SemantiqueError(String.format("Invalid type in assignation of Identifier %s", varName));
         }
-
+        */
         return null;
     }
 
@@ -253,6 +256,8 @@ public class SemantiqueVisitor implements ParserVisitor {
             soit le même des deux côtés de l'égalité/l'inégalité.
         */
         // TODO
+
+        /*
         int numChildren = node.jjtGetNumChildren();
         VarType equalityTypes[] = new VarType[2];
 
@@ -288,6 +293,8 @@ public class SemantiqueVisitor implements ParserVisitor {
             }
         }
 
+
+         */
         return null;
     }
 
@@ -300,33 +307,42 @@ public class SemantiqueVisitor implements ParserVisitor {
     @Override
     public Object visit(ASTAddExpr node, Object data) {
         // TODO
+        /*
         int numChildren = node.jjtGetNumChildren();
         for (int i = 0; i < numChildren; i++) {
             DataStruct d = new DataStruct();
             node.jjtGetChild(i).jjtAccept(this, d);
         }
+
+         */
         return null;
     }
 
     @Override
     public Object visit(ASTMulExpr node, Object data) {
         // TODO
+        /*
         int numChildren = node.jjtGetNumChildren();
         for (int i = 0; i < numChildren; i++) {
             DataStruct d = new DataStruct();
             node.jjtGetChild(i).jjtAccept(this, d);
         }
+
+         */
         return null;
     }
 
     @Override
     public Object visit(ASTBoolExpr node, Object data) {
+        /*
         // TODO
         int numChildren = node.jjtGetNumChildren();
         for (int i = 0; i < numChildren; i++) {
             DataStruct d = new DataStruct();
             node.jjtGetChild(i).jjtAccept(this, d);
         }
+
+         */
         return null;
     }
 
