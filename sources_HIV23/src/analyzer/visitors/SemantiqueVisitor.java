@@ -88,20 +88,17 @@ public class SemantiqueVisitor implements ParserVisitor {
     // Enregistre les variables avec leur type dans la table symbolique.
     @Override
     public Object visit(ASTDeclaration node, Object data) {
-        // jjGetChild is used to access the 'Identifier()' child of 'Declaration'. getValue() is used to access its value
-        // Here, declaration can only have (or has only) one child : Identifier() (see Langage.jjt for more info)
-        String varName = ((ASTIdentifier) node.jjtGetChild(0)).getValue();
+
+        String variableName = ((ASTIdentifier) node.jjtGetChild(0)).getValue();
 
         // TODO
         this.VAR++;
 
-        // This is how we proceed to check if the variable (represented here by 'Identifier()') has already been declared
-        if (SymbolTable.containsKey(varName)) {
-            throw new SemantiqueError(String.format("Identifier %s has multiple declarations", varName));
+        if (SymbolTable.containsKey(variableName)) {
+            throw new SemantiqueError(String.format("Identifier %s has multiple declarations", variableName));
         }
 
-        // If variable hasn't been declared, we add it to the value of its name to the symbols' table
-        SymbolTable.put(varName, node.getValue().equals("num") ? VarType.Number : VarType.Bool);
+        SymbolTable.put(variableName, node.getValue().equals("num") ? VarType.Number : VarType.Bool);
         return null;
     }
 
@@ -138,22 +135,17 @@ public class SemantiqueVisitor implements ParserVisitor {
     public Object visit(ASTIfStmt node, Object data) {
         // TODO : Fiez vous aux langages pour determiner les noeuds enfants possible
         this.IF++;
-        DataStruct d = new DataStruct();
+        DataStruct expressionData = new DataStruct();
 
-        // jjGetChild is used to access the 'Expr()' part. jjtAccept is then used to access the "what's inside 'Expr()'" if that makes sensse
-        // DataStruct is then used to access the type of 'Expr()'
-        node.jjtGetChild(0).jjtAccept(this, d);
-        if (d.type != VarType.Bool) {
-            throw new SemantiqueError("Invalid type in condition.");
-        }
+        checkIfConditionIsBoolean(node, expressionData);
 
-        int numChildren = node.jjtGetNumChildren();
-        for (int i = 1; i < numChildren; i++) {
+        int numberOfChildren = node.jjtGetNumChildren();
+        for (int i = 1; i < numberOfChildren; i++) {
             Node child = node.jjtGetChild(i);
             child.jjtAccept(this, data);
             if (data == null) {
                 data = new DataStruct();
-                ((DataStruct)data).type = d.type;
+                ((DataStruct)data).type = expressionData.type;
             }
         }
 
@@ -165,17 +157,13 @@ public class SemantiqueVisitor implements ParserVisitor {
         // TODO
 
         this.WHILE++;
-        DataStruct d = new DataStruct();
+        DataStruct expressionData = new DataStruct();
 
-        node.jjtGetChild(0).jjtAccept(this, d);
-        // [d]~= value of node.jjtGetChild(0) ~= While(['Expr'])
-        if (((DataStruct)d).type != VarType.Bool) {
-            throw new SemantiqueError("Invalid type in condition.");
-        }
+        checkIfConditionIsBoolean(node, expressionData);
 
-        int numChildren = node.jjtGetNumChildren();
+        int numberOfChildren = node.jjtGetNumChildren();
 
-        for (int i = 1; i < numChildren; i++) {
+        for (int i = 1; i < numberOfChildren; i++) {
             node.jjtGetChild(i).jjtAccept(this, data);
         }
 
@@ -220,13 +208,13 @@ public class SemantiqueVisitor implements ParserVisitor {
     @Override
     public Object visit(ASTAssignStmt node, Object data) {
         // TODO
-        String varName = ((ASTIdentifier) node.jjtGetChild(0)).getValue();
+        String variableName = ((ASTIdentifier) node.jjtGetChild(0)).getValue();
 
-        DataStruct rightData = new DataStruct();
-        node.jjtGetChild(1).jjtAccept(this, rightData);
+        DataStruct rightHandSideData = new DataStruct();
+        node.jjtGetChild(1).jjtAccept(this, rightHandSideData);
 
-        if (rightData.type != SymbolTable.get(varName)) {
-            throw new SemantiqueError(String.format("Invalid type in assignation of Identifier %s", varName));
+        if (rightHandSideData.type != SymbolTable.get(variableName)) {
+            throw new SemantiqueError(String.format("Invalid type in assignation of Identifier %s", variableName));
         }
 
         return null;
@@ -277,6 +265,15 @@ public class SemantiqueVisitor implements ParserVisitor {
         return null;
     }
 
+    public Object checkIfConditionIsBoolean(SimpleNode node, Object data) {
+        node.jjtGetChild(0).jjtAccept(this, data);
+        if (((DataStruct)data).type != VarType.Bool) {
+            throw new SemantiqueError("Invalid type in condition.");
+        }
+
+        return null;
+    }
+
 
     @Override
     public Object visit(ASTCompExpr node, Object data) {
@@ -316,18 +313,29 @@ public class SemantiqueVisitor implements ParserVisitor {
         - s’il n'y a qu'un enfant, aucune vérification à faire.
         - Par exemple, un AddExpr peut retourner le type "Bool" à condition de n'avoir qu'un seul enfant.
      */
-    @Override
-    public Object visit(ASTAddExpr node, Object data) {
-        // TODO
+    public Object checkIfOnlyChild(SimpleNode node, Object data) {
         if (node.jjtGetNumChildren() == 1) {
             node.childrenAccept(this, data);
             return null;
         }
 
+        return null;
+    }
+
+    public Object incrementOperatorCount(SimpleNode node, Object data) {
+        this.OP++;
+        checkNumberType(node, data);
+        ((DataStruct) data).type = VarType.Number;
+        return null;
+    }
+
+    @Override
+    public Object visit(ASTAddExpr node, Object data) {
+        // TODO
+        checkIfOnlyChild(node, data);
+
         if (node.getOps().size() > 0) {
-            this.OP++;
-            checkNumberType(node, data);
-            ((DataStruct) data).type = VarType.Number;
+            incrementOperatorCount(node, data);
             return null;
         }
 
@@ -337,15 +345,10 @@ public class SemantiqueVisitor implements ParserVisitor {
     @Override
     public Object visit(ASTMulExpr node, Object data) {
         // TODO
-        if (node.jjtGetNumChildren() == 1) {
-            node.childrenAccept(this, data);
-            return null;
-        }
+        checkIfOnlyChild(node, data);
 
         if (node.getOps().size() > 0) {
-            this.OP++;
-            checkNumberType(node, data);
-            ((DataStruct) data).type = VarType.Number;
+            incrementOperatorCount(node, data);
             return null;
         }
 
@@ -380,15 +383,21 @@ public class SemantiqueVisitor implements ParserVisitor {
         - S’il n'y a pas d'opérande, ne rien faire.
         - S’il y a un (ou plus) opérande, il faut vérifier le type.
     */
+
+    public Object errorThrower(SimpleNode node, Object data, VarType type) {
+
+        this.OP++;
+        node.jjtGetChild(0).jjtAccept(this, data);
+        if (((DataStruct) data).type != type) {
+            throw new SemantiqueError("Invalid type in expression");
+        }
+        return null;
+    }
     @Override
     public Object visit(ASTNotExpr node, Object data) {
         // TODO
         if (node.getOps().size() > 0) {
-            this.OP++;
-            node.jjtGetChild(0).jjtAccept(this, data);
-            if (((DataStruct) data).type != VarType.Bool) {
-                throw new SemantiqueError("Invalid type in expression");
-            }
+            errorThrower(node, data, VarType.Bool);
             ((DataStruct) data).type = VarType.Bool;
             return null;
         }
@@ -401,11 +410,7 @@ public class SemantiqueVisitor implements ParserVisitor {
     public Object visit(ASTUnaExpr node, Object data) {
         // TODO
         if (node.getOps().size() > 0) {
-            this.OP++;
-            node.jjtGetChild(0).jjtAccept(this, data);
-            if (((DataStruct) data).type != VarType.Number) {
-                throw new SemantiqueError("Invalid type in expression");
-            }
+            errorThrower(node, data, VarType.Number);
             return null;
         }
         node.childrenAccept(this,data);
