@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="javacc">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/sources_HIV23/libs/javacc-7.0.2/bin/lib/javacc.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

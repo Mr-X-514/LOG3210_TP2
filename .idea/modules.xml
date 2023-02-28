@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/sources_HIV23/libs/javacc-7.0.2/examples/GUIParsing/GUIParsing.iml" filepath="$PROJECT_DIR$/sources_HIV23/libs/javacc-7.0.2/examples/GUIParsing/GUIParsing.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sources_HIV23/libs/javacc-7.0.2/examples/JJTreeExamples/JJTreeExamples.iml" filepath="$PROJECT_DIR$/sources_HIV23/libs/javacc-7.0.2/examples/JJTreeExamples/JJTreeExamples.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/LOG3210_TP2.iml" filepath="$PROJECT_DIR$/.idea/LOG3210_TP2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sources_HIV23/libs/javacc-7.0.2/examples/examples.iml" filepath="$PROJECT_DIR$/sources_HIV23/libs/javacc-7.0.2/examples/examples.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sources_HIV23/sources_HIV23.iml" filepath="$PROJECT_DIR$/sources_HIV23/sources_HIV23.iml" />
+    </modules>
+  </component>
+</project>
